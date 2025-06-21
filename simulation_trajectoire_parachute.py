@@ -34,3 +34,12 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
     dt = tf / (N - 1)  # constant time step
     time = np.linspace(0, tf, N)
 
+ # Dynamique #
+    A = np.eye(2, 2)
+    B_p = np.eye(2, 2) * dt * 0.5
+    B_m = np.eye(2, 2) * dt * 0.5
+    phid_max = 0.14  # maximum rate of turn
+    zt = z(time)
+    vt = lambda z: vz0 * np.sqrt(rho0 / rho(z))
+    v = vt(zt)
+    u_0 = np.array([[v[0] * np.cos(psi_0)], [v[0] * np.sin(psi_0)]])
