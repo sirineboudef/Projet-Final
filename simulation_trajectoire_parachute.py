@@ -52,5 +52,13 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
     alpha_2 = 10
     alpha_3 = 1
 
+## OPTIMIZATION ##
 
+    # Variables #
+    x = cvx.Variable((2, N))
+    u = cvx.Variable((2, N))
+    eps_h = cvx.Variable(nonneg=True)
+    u_bar = cvx.Parameter((2, N))
+    u_init = np.array([v * np.cos(psi_0), v * np.sin(psi_0)])
+    u_bar.value = np.divide(u_init, np.linalg.norm(u_init, axis=0))
 
