@@ -189,3 +189,36 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
 
             ani = FuncAnimation(fig, update, frames=len(z_vals), init_func=init, blit=True)
             ani.save("trajectoire.gif", writer=PillowWriter(fps=5))
+
+ # === 1. Graphique statique 2D ===
+    fig2d = plt.figure()
+    plt.plot(X[0, :, n_iter], X[1, :, n_iter], 'b--', label="Trajectoire optimisée")
+    plt.plot(X[0, 0, n_iter], X[1, 0, n_iter], 'go', label="Départ")
+    plt.plot(X[0, -1, n_iter], X[1, -1, n_iter], 'ro', label="Arrivée")
+    plt.xlabel("x (m)")
+    plt.ylabel("y (m)")
+    plt.title("Trajectoire 2D au sol")
+    plt.legend()
+    plt.grid(True)
+    plt.savefig("graph2D.png")  # <== pour affichage dans Streamlit
+    plt.close()
+
+    # === 2. Graphique statique 3D ===
+    fig3d = plt.figure()
+    ax3d = fig3d.add_subplot(111, projection='3d')
+    ax3d.plot(X[0, :, n_iter], X[1, :, n_iter], z_t, 'b--', label="Trajectoire optimisée")
+    ax3d.scatter(X[0, 0, n_iter], X[1, 0, n_iter], z_t[0], color='green', label='Départ')
+    ax3d.scatter(X[0, -1, n_iter], X[1, -1, n_iter], z_t[-1], color='red', label='Arrivée')
+    ax3d.set_xlabel("x (m)")
+    ax3d.set_ylabel("y (m)")
+    ax3d.set_zlabel("z (m)")
+    ax3d.set_title("Trajectoire 3D")
+    ax3d.legend()
+    plt.savefig("graph3D.png")  # <== pour affichage dans Streamlit
+    plt.close()
+
+    return x_star, erreur, (xf, yf), z_t, time
+
+# Appel de la fonction:
+
+X, erreur, (xf, yf), z_t, time = simuler_trajectoire()
