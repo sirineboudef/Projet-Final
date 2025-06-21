@@ -62,3 +62,13 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
     u_init = np.array([v * np.cos(psi_0), v * np.sin(psi_0)])
     u_bar.value = np.divide(u_init, np.linalg.norm(u_init, axis=0))
 
+ # Constraintes #
+    const = [x[:, [0]] == x_0]
+    const += [u[:, [0]] == u_0]
+    const += [x[:, [k + 1]] == A @ x[:, [k]] + (B_m @ u[:, [k]] + B_p @ u[:, [k + 1]]) + [W[:, k]] for k in
+              range(0, N - 1)]  # constraint on the dynamics
+    const += [(cvx.norm2(cvx.diff(u, axis=1), axis=0) / dt / v[k])[k] <= phid_max for k in range(0, N - 1)]
+ # Contraintes de linearisation
+    const += [u_bar[:, [k]].T @ u[:, [k]] - v[k] >= -eps_h for k in range(0, N)]
+    const += [cvx.norm(u[:, [k]]) - v[k] <= eps_h for k in range(0, N)]
+
