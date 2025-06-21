@@ -136,3 +136,56 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
             problem = cvx.Problem(cvx.Minimize(cost), const)
             first_stage_converged = True
             n_iter_first = i
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            x_traj = X[0, :, n_iter]
+            y_traj = X[1, :, n_iter]
+            z_traj = z(time)
+
+            ax.set_xlim(min(x_traj), max(x_traj))
+            ax.set_ylim(min(y_traj), max(y_traj))
+            ax.set_zlim(0, max(z_traj))
+            ax.set_xlabel("x (m)")
+            ax.set_ylabel("y (m)")
+            ax.set_zlabel("z (m)")
+            ax.set_title("Animation 3D de la trajectoire")
+
+            line, = ax.plot([], [], [], lw=2, label="Trajectoire", linestyle=':')
+            point, = ax.plot([], [], [], 'ro', label="Parachute")
+
+            def update(frame):
+                line.set_data(x_traj[:frame], y_traj[:frame])
+                line.set_3d_properties(z_traj[:frame])
+                point.set_data(x_traj[frame:frame + 1], y_traj[frame:frame + 1])
+                point.set_3d_properties(z_traj[frame:frame + 1])
+                return line, point
+
+            ani = FuncAnimation(fig, update, frames=len(time), interval=170, blit=False)
+            plt.legend()
+            plt.show()
+
+            # Création de l'animation .gif finale
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            line, = ax.plot([], [], [], lw=2)
+
+            x_vals = X[0, :, n_iter]
+            y_vals = X[1, :, n_iter]
+            z_vals = z_t
+
+            def init():
+                line.set_data([], [])
+                line.set_3d_properties([])
+                ax.set_xlim(np.min(x_vals), np.max(x_vals))
+                ax.set_ylim(np.min(y_vals), np.max(y_vals))
+                ax.set_zlim(0, np.max(z_vals))
+                return line,
+
+            def update(i):
+                line.set_data(x_vals[:i], y_vals[:i])
+                line.set_3d_properties(z_vals[:i])
+                return line,
+
+            ani = FuncAnimation(fig, update, frames=len(z_vals), init_func=init, blit=True)
+            ani.save("trajectoire.gif", writer=PillowWriter(fps=5))
