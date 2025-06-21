@@ -68,6 +68,7 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
     const += [x[:, [k + 1]] == A @ x[:, [k]] + (B_m @ u[:, [k]] + B_p @ u[:, [k + 1]]) + [W[:, k]] for k in
               range(0, N - 1)]  # constraint on the dynamics
     const += [(cvx.norm2(cvx.diff(u, axis=1), axis=0) / dt / v[k])[k] <= phid_max for k in range(0, N - 1)]
+
  # Contraintes de linearisation
     const += [u_bar[:, [k]].T @ u[:, [k]] - v[k] >= -eps_h for k in range(0, N)]
     const += [cvx.norm(u[:, [k]]) - v[k] <= eps_h for k in range(0, N)]
