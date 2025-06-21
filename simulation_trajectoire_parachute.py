@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')  # Pour ouvrir une fenêtre interactive
 from matplotlib.animation import FuncAnimation, PillowWriter
+import cvxpy as cvx
 
 # Definition de la fonction
 def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
@@ -43,3 +44,13 @@ def simuler_trajectoire(lat=47.3388, lon=-81.9141, N=31):
     vt = lambda z: vz0 * np.sqrt(rho0 / rho(z))
     v = vt(zt)
     u_0 = np.array([[v[0] * np.cos(psi_0)], [v[0] * np.sin(psi_0)]])
+
+ # Numerical Parameters #
+    eps_h_val = 0.1
+    eps_convergence = 0.01
+    alpha_1 = 100
+    alpha_2 = 10
+    alpha_3 = 1
+
+
+
