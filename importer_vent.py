@@ -35,3 +35,24 @@ def import_vent(lat, lon, hour_index=0, N=31, z0=1200):
     response = requests.get(url)
     data = response.json()
 
+    def convert_to_vx_vy(speed_kmh, direction_deg):
+        speed_ms = speed_kmh * 1000 / 3600
+        angle_rad = np.radians(direction_deg)
+        return speed_ms * np.sin(angle_rad), speed_ms * np.cos(angle_rad)
+
+    # Extraction des profils vent
+    vx_profiles = []
+    vy_profiles = []
+    for a in altitudes_api:
+        speed = data['hourly'][f'wind_speed_{a}m'][hour_index]
+        direction = data['hourly'][f'wind_direction_{a}m'][hour_index]
+        vx, vy = convert_to_vx_vy(speed, direction)
+        vx_profiles.append(vx)
+        vy_profiles.append(vy)
+
+    # Interpolation
+    vx_interp = np.interp(z_t, altitudes_api, vx_profiles)
+    vy_interp = np.interp(z_t, altitudes_api, vy_profiles)
+
+    W = np.array([vx_interp, vy_interp])
+    return W, z_t, time, data
