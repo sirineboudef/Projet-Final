@@ -16,3 +16,9 @@ class ImportVent:
         self.rho0 = self.ch * (1 - self.z0 * self.cz) ** self.ce
         self.rz0 = -7.9
         self.t0 = 0
+
+    def convert_to_vx_vy(self, speed_kmh, direction_deg):
+        speed_ms = speed_kmh * 1000 / 3600
+        angle_rad = np.radians(direction_deg)
+        return speed_ms * np.sin(angle_rad), speed_ms * np.cos(angle_rad)
+
