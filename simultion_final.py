@@ -23,3 +23,14 @@ class SimulationTrajectoire:
         self.vz0 = 18.5
         self.psi_0 = 0.
 
+    def calcul_altitude(self, t):
+        return 1 / self.cz * (1 - ((((1 - self.z0 * self.cz) ** self.cf) / self.cf / self.cz -
+                                    (t - self.t0) * self.rz0 * np.sqrt(self.rho0) / np.sqrt(self.ch)) *
+                                   self.cf * self.cz) ** (1 / self.cf))
+
+    def calcul_densite(self, z):
+        return self.ch * (1 - z * self.cz) ** self.ce
+
+    def calcul_profil_vitesse(self, z):
+        return self.vz0 * np.sqrt(self.rho0 / self.calcul_densite(z))
+
