@@ -25,6 +25,29 @@ import pandas as pd
 # plotly.express : permet de créer facilement des graphiques interactifs (ex : courbes, cartes, etc.)
 import plotly.express as px
 
+
+#Calcule la température standard en fonction de l'altitude (selon l'atmosphère standard de l'ISA)
+def temperature_standard(h):
+    T0 = 288.15            # Température au niveau de la mer en Kelvin (15°C)
+    lapse_rate = 0.0065    # Taux de décroissance de la température (6.5°C/km)
+    return T0 - lapse_rate * h  # Formule : T(h) = T0 - (lapse_rate × h)
+
+# Calcule la pression atmosphérique standard en fonction de l'altitude (jusqu'à ~11 km)
+def pression_standard(h):
+    T0 = 288.15            # Température au niveau de la mer en Kelvin
+    P0 = 1013.25           # Pression au niveau de la mer en hPa
+    lapse_rate = 0.0065    # Taux de décroissance de température (K/m)
+    g = 9.80665            # Accélération gravitationnelle (m/s²)
+    M = 0.0289644          # Masse molaire de l'air (kg/mol)
+    R = 8.31447            # Constante universelle des gaz parfaits (J/mol·K)
+
+    # Formule barométrique avec température variable (modèle ISA)
+    return P0 * (1 - (lapse_rate * h) / T0) ** ((g * M) / (R * lapse_rate))
+
+
+
+
+
 # Fonction pour définir une image d'arrière-plan animée (GIF) dans l'application Streamlit
 def set_background_image():
     # CSS intégré pour personnaliser l'apparence de l'application (stApp est la classe principale de Streamlit)
