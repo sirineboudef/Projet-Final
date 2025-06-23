@@ -1,5 +1,5 @@
-"""""Creation de l'interface streamlit, 
-Pour avoir un interaction plus dynamique avec l'utilisateur   """""
+"""Creation de l'interface streamlit,
+Pour avoir une interaction plus dynamique avec l'utilisateur"""
 
 # streamlit : permet de créer des interfaces web interactives en Python
 import streamlit as st
@@ -25,12 +25,17 @@ import pandas as pd
 # plotly.express : permet de créer facilement des graphiques interactifs (ex : courbes, cartes, etc.)
 import plotly.express as px
 
+from importer_vent import *
+from simultion_final import *
+from simulation_trajectoire_parachute import *
 
-#Calcule la température standard en fonction de l'altitude (selon l'atmosphère standard de l'ISA)
+
+# Calcule la température standard en fonction de l'altitude (selon l'atmosphère standard de l'ISA)
 def temperature_standard(h):
     T0 = 288.15            # Température au niveau de la mer en Kelvin (15°C)
     lapse_rate = 0.0065    # Taux de décroissance de la température (6.5°C/km)
     return T0 - lapse_rate * h  # Formule : T(h) = T0 - (lapse_rate × h)
+
 
 # Calcule la pression atmosphérique standard en fonction de l'altitude (jusqu'à ~11 km)
 def pression_standard(h):
@@ -43,9 +48,6 @@ def pression_standard(h):
 
     # Formule barométrique avec température variable (modèle ISA)
     return P0 * (1 - (lapse_rate * h) / T0) ** ((g * M) / (R * lapse_rate))
-
-
-
 
 
 # Fonction pour définir une image d'arrière-plan animée (GIF) dans l'application Streamlit
@@ -71,6 +73,7 @@ def set_background_image():
     # Injection du style CSS dans la page via Markdown, avec autorisation du HTML
     st.markdown(page_bg_img, unsafe_allow_html=True)
 
+
 # Convertir un angle (en degrés) en une direction cardinale (ex : Nord, Sud-Ouest, etc.)
 def angle_to_direction(angle):
     # Liste des 8 directions cardinales principales (chaque direction couvre 45°)
@@ -82,6 +85,7 @@ def angle_to_direction(angle):
 
     # Retourne la direction correspondante à l'angle
     return directions[idx]
+
 
 # Interface
 
@@ -107,6 +111,7 @@ st.markdown('<p style="color:blue">Cliquez sur la carte pour sélectionner les c
 
 # Intègre la carte Folium dans l'application Streamlit et récupère les données de clic (coordonnées choisies)
 map_data = st_folium(m, width=700, height=500)
+
 
 # Si l'utilisateur clique sur la carte et que des coordonnées sont disponibles
 if map_data and map_data["last_clicked"]:
@@ -156,86 +161,86 @@ if map_data and map_data["last_clicked"]:
         # Filtre les heures météo uniquement pour la date sélectionnée
         heures_du_jour = [h for h in heures_disponibles_dt if h.date() == date_selectionnee]
 
-    # Vérifie qu’il y a bien des heures disponibles pour la date sélectionnée
-    if heures_du_jour:
-        # Affiche une liste déroulante pour choisir l'heure exacte de livraison
-        heure_selectionnee = st.selectbox("Sélectionnez l'heure", heures_du_jour)
+        # Vérifie qu’il y a bien des heures disponibles pour la date sélectionnée
+        if heures_du_jour:
+            # Affiche une liste déroulante pour choisir l'heure exacte de livraison
+            heure_selectionnee = st.selectbox("Sélectionnez l'heure", heures_du_jour)
 
-        # Trouve l’index de cette heure dans la liste complète des horaires météo
-        index_horaire = heures_disponibles_dt.index(heure_selectionnee)
+            # Trouve l’index de cette heure dans la liste complète des horaires météo
+            index_horaire = heures_disponibles_dt.index(heure_selectionnee)
 
-        # 📊 Préparation des données météo multi-altitudes
-        altitudes = [10, 80, 120, 180]  # Altitudes standards (en mètres) pour les mesures de vent
+            # 📊 Préparation des données météo multi-altitudes
+            altitudes = [10, 80, 120, 180]  # Altitudes standards (en mètres) pour les mesures de vent
 
-        # Liste qui va contenir les données météo pour chaque altitude
-        meteo_multi_alt = []
+            # Liste qui va contenir les données météo pour chaque altitude
+            meteo_multi_alt = []
 
-        # Boucle sur chaque altitude pour récupérer les données correspondantes
-        for alt in altitudes:
-            # Récupère la vitesse du vent à l’altitude donnée, pour l'heure sélectionnée
-            vitesse = response["hourly"].get(f"wind_speed_{alt}m", [None])[index_horaire]
+            # Boucle sur chaque altitude pour récupérer les données correspondantes
+            for alt in altitudes:
+                # Récupère la vitesse du vent à l’altitude donnée, pour l'heure sélectionnée
+                vitesse = response["hourly"].get(f"wind_speed_{alt}m", [None])[index_horaire]
 
-            # Récupère la direction du vent à cette altitude
-            direction = response["hourly"].get(f"wind_direction_{alt}m", [None])[index_horaire]
+                # Récupère la direction du vent à cette altitude
+                direction = response["hourly"].get(f"wind_direction_{alt}m", [None])[index_horaire]
 
-            # Crée un dictionnaire avec les données météo pour cette altitude
-            meteo_multi_alt.append({
-                "Altitude (m)": alt,
-                "Vitesse (m/s)": round(vitesse, 2) if vitesse else None,  # arrondi à 2 décimales
-                "Direction (°)": round(direction) if direction else None,  # direction en degrés
-                "Direction": angle_to_direction(direction) if direction else None,  # direction cardinale
-                "Température (°C)": round(temperature_standard(alt) - 273.15, 2),  # conversion K → °C
-                "Pression (kPa)": round(pression_standard(alt) / 10, 2)  # conversion hPa → kPa
-            })
+                # Crée un dictionnaire avec les données météo pour cette altitude
+                meteo_multi_alt.append({
+                    "Altitude (m)": alt,
+                    "Vitesse (m/s)": round(vitesse, 2) if vitesse else None,  # arrondi à 2 décimales
+                    "Direction (°)": round(direction) if direction else None,  # direction en degrés
+                    "Direction": angle_to_direction(direction) if direction else None,  # direction cardinale
+                    "Température (°C)": round(temperature_standard(alt) - 273.15, 2),  # conversion K → °C
+                    "Pression (kPa)": round(pression_standard(alt) / 10, 2)  # conversion hPa → kPa
+                })
 
-        # 🔽 Trie les données météo par altitude décroissante (du plus haut au plus bas)
-        meteo_multi_alt.sort(key=lambda x: x['Altitude (m)'], reverse=True)
+            # 🔽 Trie les données météo par altitude décroissante (du plus haut au plus bas)
+            meteo_multi_alt.sort(key=lambda x: x['Altitude (m)'], reverse=True)
 
-        # Convertit la liste de dictionnaires en un DataFrame Pandas pour un affichage structuré
-        df_meteo = pd.DataFrame(meteo_multi_alt)
+            # Convertit la liste de dictionnaires en un DataFrame Pandas pour un affichage structuré
+            df_meteo = pd.DataFrame(meteo_multi_alt)
 
-        # 📊 Affichage du tableau
-        st.subheader("📊 Données météorologiques")
+            # 📊 Affichage du tableau
+            st.subheader("📊 Données météorologiques")
 
-        # Affiche un tableau interactif avec des couleurs :
-        # - dégradé bleu pour la vitesse du vent
-        # - dégradé rouge pour la température
-        st.dataframe(
-            df_meteo.style
-            .background_gradient(subset=["Vitesse (m/s)"], cmap="Blues")
-            .background_gradient(subset=["Température (°C)"], cmap="Reds"),
-            width=800
-        )
-
-        # 📈 Graphiques
-        st.subheader("📈 Visualisations")
-
-        # ➤ Graphique linéaire : Vitesse du vent selon l'altitude
-        fig_vitesse = px.line(
-            df_meteo,
-            x="Altitude (m)",
-            y="Vitesse (m/s)",
-            title="Vitesse du vent par altitude",
-            markers=True,  # Ajoute des marqueurs sur les points
-            color_discrete_sequence=["#3498DB"]  # Couleur personnalisée (bleu)
-        )
-
-        # Affiche le graphique dans Streamlit
-        st.plotly_chart(fig_vitesse, use_container_width=True)
-
-        # ➤ Tendance du vent : représentation polaire de la direction et vitesse du vent
-        if all(df_meteo["Direction (°)"].notna()):  # Vérifie que toutes les directions sont valides
-            fig_rose = px.bar_polar(
-                df_meteo,
-                r="Vitesse (m/s)",  # Rayon = vitesse du vent
-                theta="Direction (°)",  # Angle = direction du vent en degrés
-                color="Altitude (m)",  # Couleur selon l'altitude
-                title="Tendance du vent",
-                template="plotly_dark",  # Thème sombre
-                color_continuous_scale="Viridis"  # Échelle de couleur
+            # Affiche un tableau interactif avec des couleurs :
+            # - dégradé bleu pour la vitesse du vent
+            # - dégradé rouge pour la température
+            st.dataframe(
+                df_meteo.style
+                .background_gradient(subset=["Vitesse (m/s)"], cmap="Blues")
+                .background_gradient(subset=["Température (°C)"], cmap="Reds"),
+                width=800
             )
-            # Affiche la tendance des vents
-            st.plotly_chart(fig_rose, use_container_width=True)
+
+            # 📈 Graphiques
+            st.subheader("📈 Visualisations")
+
+            # ➤ Graphique linéaire : Vitesse du vent selon l'altitude
+            fig_vitesse = px.line(
+                df_meteo,
+                x="Altitude (m)",
+                y="Vitesse (m/s)",
+                title="Vitesse du vent par altitude",
+                markers=True,  # Ajoute des marqueurs sur les points
+                color_discrete_sequence=["#3498DB"]  # Couleur personnalisée (bleu)
+            )
+
+            # Affiche le graphique dans Streamlit
+            st.plotly_chart(fig_vitesse, use_container_width=True)
+
+            # ➤ Tendance du vent : représentation polaire de la direction et vitesse du vent
+            if all(df_meteo["Direction (°)"].notna()):  # Vérifie que toutes les directions sont valides
+                fig_rose = px.bar_polar(
+                    df_meteo,
+                    r="Vitesse (m/s)",  # Rayon = vitesse du vent
+                    theta="Direction (°)",  # Angle = direction du vent en degrés
+                    color="Altitude (m)",  # Couleur selon l'altitude
+                    title="Tendance du vent",
+                    template="plotly_dark",  # Thème sombre
+                    color_continuous_scale="Viridis"  # Échelle de couleur
+                )
+                # Affiche la tendance des vents
+                st.plotly_chart(fig_rose, use_container_width=True)
 
             # 📍 Carte de localisation
             st.subheader("📍 Position final de livraison")
@@ -253,26 +258,24 @@ if map_data and map_data["last_clicked"]:
             # Affiche la carte avec le marqueur dans Streamlit
             st_folium(m, width=700, height=300)
 
-            # Si aucune donnée météo disponible pour la date sélectionnée
-            else:
+        else:
             st.warning("Aucune donnée disponible pour cette date.")
 
-            # Gestion des erreurs pendant la récupération des données API ou traitement
-            except Exception as e:
-            st.error("Erreur lors de la récupération des données météo.")
-            st.exception(e)
+    except Exception as e:
+        st.error("Erreur lors de la récupération des données météo.")
+        st.exception(e)
 
-            # Si l'utilisateur n’a pas encore cliqué sur la carte
-            else:
-            st.info("Veuillez sélectionner un point sur la carte pour commencer.")
+else:
+    st.info("Veuillez sélectionner un point sur la carte pour commencer.")
 
-            # Initialisation d'un conteneur de session pour retenir le point sélectionné
-            # Ceci permet de "mémoriser" les coordonnées sélectionnées même si l'utilisateur interagit avec d'autres éléments
-            if "clicked_point" not in st.session_state:
-                st.session_state.clicked_point = None
+
+# Initialisation d'un conteneur de session pour retenir le point sélectionné
+# Ceci permet de "mémoriser" les coordonnées sélectionnées même si l'utilisateur interagit avec d'autres éléments
+if "clicked_point" not in st.session_state:
+    st.session_state.clicked_point = None
 
 # Si un clic sur la carte est détecté, on enregistre les coordonnées dans la session
-if map_data["last_clicked"] is not None:
+if map_data and map_data["last_clicked"] is not None:
     st.session_state.clicked_point = map_data["last_clicked"]
 
     # Affiche un message de confirmation avec les coordonnées cliquées
@@ -301,6 +304,7 @@ if st.session_state.clicked_point:
         st.image("graph2D.png", caption="📉 Trajectoire au sol (2D)")          # Vue 2D
         st.image("graph3D.png", caption="📊 Trajectoire complète (3D)")       # Vue 3D
 
+
 # 🎨 Style CSS personnalisé
 
 # Applique une feuille de style CSS directement via markdown
@@ -323,8 +327,6 @@ thead tr th, tbody tr td {
 }
 </style>
 """, unsafe_allow_html=True)
-
-
 
 
 
