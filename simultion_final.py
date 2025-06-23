@@ -6,7 +6,7 @@ matplotlib.use('TkAgg')
 from matplotlib.animation import FuncAnimation, PillowWriter
 import cvxpy as cvx
 
-class SimulationTrajectoire:
+class SimulerTrajectoire:
     def __init__(self, lat=47.3388, lon=-81.9141, N=31):
         self.lat = lat
         self.lon = lon
@@ -34,7 +34,7 @@ class SimulationTrajectoire:
     def calcul_profil_vitesse(self, z):
         return self.vz0 * np.sqrt(self.rho0 / self.calcul_densite(z))
 
-    def simuler_trajectoire(self):
+    def optimiser_trajectoire(self):
         W, z_t, time, _ = import_vent(self.lat, self.lon, self.N)
         self.time = time
         self.z_t = z_t
@@ -141,3 +141,39 @@ class SimulationTrajectoire:
         plt.savefig("graph3D.png")
         plt.show()
 
+    def animation_trajectoire(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        line, = ax.plot([], [], [], lw=2, label="Trajectoire", linestyle=':')
+        point, = ax.plot([], [], [], 'ro', label="Parachute")
+
+        x_traj = self.x_star[0, :]
+        y_traj = self.x_star[1, :]
+        z_traj = self.calcul_altitude(self.time)
+
+        ax.set_xlim(min(x_traj), max(x_traj))
+        ax.set_ylim(min(y_traj), max(y_traj))
+        ax.set_zlim(0, max(z_traj))
+        ax.set_xlabel("x (m)")
+        ax.set_ylabel("y (m)")
+        ax.set_zlabel("z (m)")
+        ax.set_title("Animation 3D de la trajectoire")
+
+        def update(frame):
+            line.set_data(x_traj[:frame], y_traj[:frame])
+            line.set_3d_properties(z_traj[:frame])
+            point.set_data(x_traj[frame:frame + 1], y_traj[frame:frame + 1])
+            point.set_3d_properties(z_traj[frame:frame + 1])
+            return line, point
+
+        ani = FuncAnimation(fig, update, frames=len(self.time), interval=170, blit=False)
+        plt.legend()
+        plt.show()
+        ani.save("trajectoire.gif", writer=PillowWriter(fps=5))
+
+# Appel de la fonction:
+simulateur = SimulerTrajectoire()
+X, erreur, (xf, yf), z_t, time = simulateur.optimiser_trajectoire()
+simulateur.dessin_trajectoire_2D()
+simulateur.dessin_trajectoire_3D()
+simulateur.animation_trajectoire()
