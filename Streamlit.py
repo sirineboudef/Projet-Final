@@ -132,3 +132,49 @@ if map_data and map_data["last_clicked"]:
 
         # Filtre les heures météo uniquement pour la date sélectionnée
         heures_du_jour = [h for h in heures_disponibles_dt if h.date() == date_selectionnee]
+
+    # Vérifie qu’il y a bien des heures disponibles pour la date sélectionnée
+    if heures_du_jour:
+        # Affiche une liste déroulante pour choisir l'heure exacte de livraison
+        heure_selectionnee = st.selectbox("Sélectionnez l'heure", heures_du_jour)
+
+        # Trouve l’index de cette heure dans la liste complète des horaires météo
+        index_horaire = heures_disponibles_dt.index(heure_selectionnee)
+
+        # 📊 Préparation des données météo multi-altitudes
+        altitudes = [10, 80, 120, 180]  # Altitudes standards (en mètres) pour les mesures de vent
+
+        # Liste qui va contenir les données météo pour chaque altitude
+        meteo_multi_alt = []
+
+        # Boucle sur chaque altitude pour récupérer les données correspondantes
+        for alt in altitudes:
+            # Récupère la vitesse du vent à l’altitude donnée, pour l'heure sélectionnée
+            vitesse = response["hourly"].get(f"wind_speed_{alt}m", [None])[index_horaire]
+
+            # Récupère la direction du vent à cette altitude
+            direction = response["hourly"].get(f"wind_direction_{alt}m", [None])[index_horaire]
+
+            # Crée un dictionnaire avec les données météo pour cette altitude
+            meteo_multi_alt.append({
+                "Altitude (m)": alt,
+                "Vitesse (m/s)": round(vitesse, 2) if vitesse else None,  # arrondi à 2 décimales
+                "Direction (°)": round(direction) if direction else None,  # direction en degrés
+                "Direction": angle_to_direction(direction) if direction else None,  # direction cardinale
+                "Température (°C)": round(temperature_standard(alt) - 273.15, 2),  # conversion K → °C
+                "Pression (kPa)": round(pression_standard(alt) / 10, 2)  # conversion hPa → kPa
+            })
+
+        # 🔽 Trie les données météo par altitude décroissante (du plus haut au plus bas)
+        meteo_multi_alt.sort(key=lambda x: x['Altitude (m)'], reverse=True)
+
+        # Convertit la liste de dictionnaires en un DataFrame Pandas pour un affichage structuré
+        df_meteo = pd.DataFrame(meteo_multi_alt)
+
+
+
+
+
+
+
+
