@@ -243,6 +243,67 @@ if map_data and map_data["last_clicked"]:
             else:
             st.info("Veuillez sélectionner un point sur la carte pour commencer.")
 
+            # Initialisation d'un conteneur de session pour retenir le point sélectionné
+            # Ceci permet de "mémoriser" les coordonnées sélectionnées même si l'utilisateur interagit avec d'autres éléments
+            if "clicked_point" not in st.session_state:
+                st.session_state.clicked_point = None
+
+# Si un clic sur la carte est détecté, on enregistre les coordonnées dans la session
+if map_data["last_clicked"] is not None:
+    st.session_state.clicked_point = map_data["last_clicked"]
+
+    # Affiche un message de confirmation avec les coordonnées cliquées
+    st.success(f"📍 Point sélectionné : lat = {st.session_state.clicked_point['lat']:.4f}, "
+               f"lon = {st.session_state.clicked_point['lng']:.4f}")
+
+# Si un point a bien été sélectionné (stocké en session)
+if st.session_state.clicked_point:
+    # Affiche un bouton pour lancer la simulation
+    if st.button("🚀 Lancer la simulation"):
+        # Récupère les coordonnées mémorisées
+        lat = st.session_state.clicked_point["lat"]
+        lon = st.session_state.clicked_point["lng"]
+
+        # Affiche un spinner pendant que la simulation s'exécute
+        with st.spinner("Simulation en cours..."):
+            # Appelle une fonction (personnalisée) pour simuler la trajectoire du drone/parachute
+            x_star, erreur, (xf, yf), z_t, time = simuler_trajectoire(lat=lat, lon=lon)
+
+        # Résultats de la simulation
+        st.write(f"📍 Point d'atterrissage : ({xf:.2f}, {yf:.2f})")  # Coordonnées finales
+        st.write(f"🎯 Erreur par rapport à la cible : {erreur:.2f} m")  # Précision de l'atterrissage
+
+        # Affiche différentes visualisations de la trajectoire
+        st.image("trajectoire.gif", caption="Animation 3D de la trajectoire")  # Animation GIF
+        st.image("graph2D.png", caption="📉 Trajectoire au sol (2D)")          # Vue 2D
+        st.image("graph3D.png", caption="📊 Trajectoire complète (3D)")       # Vue 3D
+
+# 🎨 Style CSS personnalisé
+
+# Applique une feuille de style CSS directement via markdown
+# Ici : force tout le texte (titres, paragraphes, tableaux, etc.) à apparaître en rouge
+st.markdown("""
+<style>
+/* Texte en rouge partout */
+html, body, [class*="st-"], .stApp {
+    color: red !important;
+}
+
+/* Éléments spécifiques */
+h1, h2, h3, h4, h5, h6, p, div, span {
+    color: red !important;
+}
+
+/* Forcer la couleur dans les tableaux */
+thead tr th, tbody tr td {
+    color: red !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+
+
 
 
 
