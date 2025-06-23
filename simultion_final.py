@@ -108,3 +108,10 @@ class SimulationTrajectoire:
         self.n_iter = n_iter
         return self.x_star, self.calcul_erreur(), (self.x_star[0, -1], self.x_star[1, -1]), self.z_t, self.time
 
+    def calcul_erreur(self):
+        xf = self.x_star[0, -1]
+        yf = self.x_star[1, -1]
+        tx, ty = self.target[0], self.target[1]
+        return np.sqrt((xf - tx) ** 2 + (yf - ty) ** 2)
+
+
