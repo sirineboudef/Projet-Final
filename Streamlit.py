@@ -47,3 +47,15 @@ def set_background_image():
     '''
     # Injection du style CSS dans la page via Markdown, avec autorisation du HTML
     st.markdown(page_bg_img, unsafe_allow_html=True)
+
+# Convertir un angle (en degrés) en une direction cardinale (ex : Nord, Sud-Ouest, etc.)
+def angle_to_direction(angle):
+    # Liste des 8 directions cardinales principales (chaque direction couvre 45°)
+    directions = ['Nord', 'Nord-Est', 'Est', 'Sud-Est', 'Sud', 'Sud-Ouest', 'Ouest', 'Nord-Ouest']
+
+    # Calcul de l’index dans la liste en divisant l’angle en secteurs de 45°
+    # On ajoute 22.5 pour centrer les plages de direction (ex : Nord = de 337.5° à 22.5°)
+    idx = int((angle + 22.5) % 360 / 45)
+
+    # Retourne la direction correspondante à l'angle
+    return directions[idx]
