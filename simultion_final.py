@@ -6,7 +6,7 @@ matplotlib.use('TkAgg')
 from matplotlib.animation import FuncAnimation, PillowWriter
 import cvxpy as cvx
 
-class TrajectorySimulator:
+class SimulerTrajectoire:
     def __init__(self, lat=47.3388, lon=-81.9141, N=31):
         self.lat = lat
         self.lon = lon
@@ -23,26 +23,26 @@ class TrajectorySimulator:
         self.vz0 = 18.5
         self.psi_0 = 0.
 
-    def altitude_function(self, t):
+    def calcul_altitude(self, t):
         return 1 / self.cz * (1 - ((((1 - self.z0 * self.cz) ** self.cf) / self.cf / self.cz -
                                     (t - self.t0) * self.rz0 * np.sqrt(self.rho0) / np.sqrt(self.ch)) *
                                    self.cf * self.cz) ** (1 / self.cf))
 
-    def density_function(self, z):
+    def calcul_densite(self, z):
         return self.ch * (1 - z * self.cz) ** self.ce
 
-    def velocity_profile(self, z):
-        return self.vz0 * np.sqrt(self.rho0 / self.density_function(z))
+    def calcul_profil_vitesse(self, z):
+        return self.vz0 * np.sqrt(self.rho0 / self.calcul_densite(z))
 
-    def simulate(self):
+    def optimiser_trajectoire(self):
         W, z_t, time, _ = import_vent(self.lat, self.lon, self.N)
         self.time = time
         self.z_t = z_t
 
         tf = self.time[-1]
         dt = tf / (self.N - 1)
-        z = self.altitude_function(self.time)
-        v = self.velocity_profile(z)
+        z = self.calcul_altitude(self.time)
+        v = self.calcul_profil_vitesse(z)
 
         A = np.eye(2, 2)
         B_p = np.eye(2, 2) * dt * 0.5
@@ -106,15 +106,15 @@ class TrajectorySimulator:
         self.time = time
         self.target = np.array([self.lat, self.lon])
         self.n_iter = n_iter
-        return self.x_star, self.compute_error(), (self.x_star[0, -1], self.x_star[1, -1]), self.z_t, self.time
+        return self.x_star, self.calcul_erreur(), (self.x_star[0, -1], self.x_star[1, -1]), self.z_t, self.time
 
-    def compute_error(self):
+    def calcul_erreur(self):
         xf = self.x_star[0, -1]
         yf = self.x_star[1, -1]
         tx, ty = self.target[0], self.target[1]
         return np.sqrt((xf - tx) ** 2 + (yf - ty) ** 2)
 
-    def plot_2D_trajectory(self):
+    def dessin_trajectoire_2D(self):
         fig = plt.figure()
         plt.plot(self.x_star[0, :], self.x_star[1, :], 'b--', label="Trajectoire optimisée")
         plt.plot(self.x_star[0, 0], self.x_star[1, 0], 'go', label="Départ")
@@ -127,7 +127,7 @@ class TrajectorySimulator:
         plt.savefig("graph2D.png")
         plt.show()
 
-    def plot_3D_trajectory(self):
+    def dessin_trajectoire_3D(self):
         fig = plt.figure()
         ax3d = fig.add_subplot(111, projection='3d')
         ax3d.plot(self.x_star[0, :], self.x_star[1, :], self.z_t, 'b--', label="Trajectoire optimisée")
@@ -141,7 +141,7 @@ class TrajectorySimulator:
         plt.savefig("graph3D.png")
         plt.show()
 
-    def animate_trajectory(self):
+    def animation_trajectoire(self):
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         line, = ax.plot([], [], [], lw=2, label="Trajectoire", linestyle=':')
@@ -149,7 +149,7 @@ class TrajectorySimulator:
 
         x_traj = self.x_star[0, :]
         y_traj = self.x_star[1, :]
-        z_traj = self.altitude_function(self.time)
+        z_traj = self.calcul_altitude(self.time)
 
         ax.set_xlim(min(x_traj), max(x_traj))
         ax.set_ylim(min(y_traj), max(y_traj))
@@ -172,8 +172,8 @@ class TrajectorySimulator:
         ani.save("trajectoire.gif", writer=PillowWriter(fps=5))
 
 # Appel de la fonction:
-simulator = TrajectorySimulator()
-X, erreur, (xf, yf), z_t, time = simulator.simulate()
-simulator.plot_2D_trajectory()
-simulator.plot_3D_trajectory()
-simulator.animate_trajectory()
+simulateur = SimulerTrajectoire()
+X, erreur, (xf, yf), z_t, time = simulateur.optimiser_trajectoire()
+simulateur.dessin_trajectoire_2D()
+simulateur.dessin_trajectoire_3D()
+simulateur.animation_trajectoire()
