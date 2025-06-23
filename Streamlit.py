@@ -171,6 +171,92 @@ if map_data and map_data["last_clicked"]:
         # Convertit la liste de dictionnaires en un DataFrame Pandas pour un affichage structuré
         df_meteo = pd.DataFrame(meteo_multi_alt)
 
+        # 📊 Affichage du tableau
+        st.subheader("📊 Données météorologiques")
+
+        # Affiche un tableau interactif avec des couleurs :
+        # - dégradé bleu pour la vitesse du vent
+        # - dégradé rouge pour la température
+        st.dataframe(
+            df_meteo.style
+            .background_gradient(subset=["Vitesse (m/s)"], cmap="Blues")
+            .background_gradient(subset=["Température (°C)"], cmap="Reds"),
+            width=800
+        )
+
+        # 📈 Graphiques
+        st.subheader("📈 Visualisations")
+
+        # ➤ Graphique linéaire : Vitesse du vent selon l'altitude
+        fig_vitesse = px.line(
+            df_meteo,
+            x="Altitude (m)",
+            y="Vitesse (m/s)",
+            title="Vitesse du vent par altitude",
+            markers=True,  # Ajoute des marqueurs sur les points
+            color_discrete_sequence=["#3498DB"]  # Couleur personnalisée (bleu)
+        )
+
+        # Affiche le graphique dans Streamlit
+        st.plotly_chart(fig_vitesse, use_container_width=True)
+
+        # ➤ Tendance du vent : représentation polaire de la direction et vitesse du vent
+        if all(df_meteo["Direction (°)"].notna()):  # Vérifie que toutes les directions sont valides
+            fig_rose = px.bar_polar(
+                df_meteo,
+                r="Vitesse (m/s)",  # Rayon = vitesse du vent
+                theta="Direction (°)",  # Angle = direction du vent en degrés
+                color="Altitude (m)",  # Couleur selon l'altitude
+                title="Tendance du vent",
+                template="plotly_dark",  # Thème sombre
+                color_continuous_scale="Viridis"  # Échelle de couleur
+            )
+            # Affiche la tendance des vents
+            st.plotly_chart(fig_rose, use_container_width=True)
+
+            # 📍 Carte de localisation
+            st.subheader("📍 Position final de livraison")
+
+            # Crée une carte centrée sur les coordonnées sélectionnées, avec zoom plus rapproché
+            m = folium.Map(location=[lat, lon], zoom_start=10)
+
+            # Ajoute un marqueur sur la carte avec info sur la date/heure de livraison
+            folium.Marker(
+                [lat, lon],
+                popup=f"Livraison: {date_selectionnee} {heure_selectionnee.strftime('%H:%M')}",
+                icon=folium.Icon(color="green", icon="truck")
+            ).add_to(m)
+
+            # Affiche la carte avec le marqueur dans Streamlit
+            st_folium(m, width=700, height=300)
+
+            # Si aucune donnée météo disponible pour la date sélectionnée
+            else:
+            st.warning("Aucune donnée disponible pour cette date.")
+
+            # Gestion des erreurs pendant la récupération des données API ou traitement
+            except Exception as e:
+            st.error("Erreur lors de la récupération des données météo.")
+            st.exception(e)
+
+            # Si l'utilisateur n’a pas encore cliqué sur la carte
+            else:
+            st.info("Veuillez sélectionner un point sur la carte pour commencer.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
