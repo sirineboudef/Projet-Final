@@ -114,4 +114,30 @@ class SimulationTrajectoire:
         tx, ty = self.target[0], self.target[1]
         return np.sqrt((xf - tx) ** 2 + (yf - ty) ** 2)
 
+    def dessin_trajectoire_2D(self):
+        fig = plt.figure()
+        plt.plot(self.x_star[0, :], self.x_star[1, :], 'b--', label="Trajectoire optimisée")
+        plt.plot(self.x_star[0, 0], self.x_star[1, 0], 'go', label="Départ")
+        plt.plot(self.x_star[0, -1], self.x_star[1, -1], 'ro', label="Arrivée")
+        plt.xlabel("x (m)")
+        plt.ylabel("y (m)")
+        plt.title("Trajectoire 2D au sol")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig("graph2D.png")
+        plt.show()
+
+    def dessin_trajectoire_3D(self):
+        fig = plt.figure()
+        ax3d = fig.add_subplot(111, projection='3d')
+        ax3d.plot(self.x_star[0, :], self.x_star[1, :], self.z_t, 'b--', label="Trajectoire optimisée")
+        ax3d.scatter(self.x_star[0, 0], self.x_star[1, 0], self.z_t[0], color='green', label='Départ')
+        ax3d.scatter(self.x_star[0, -1], self.x_star[1, -1], self.z_t[-1], color='red', label='Arrivée')
+        ax3d.set_xlabel("x (m)")
+        ax3d.set_ylabel("y (m)")
+        ax3d.set_zlabel("z (m)")
+        ax3d.set_title("Trajectoire 3D")
+        ax3d.legend()
+        plt.savefig("graph3D.png")
+        plt.show()
 
