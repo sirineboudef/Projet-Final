@@ -59,3 +59,28 @@ def angle_to_direction(angle):
 
     # Retourne la direction correspondante à l'angle
     return directions[idx]
+
+# Interface
+
+# Configure la page Streamlit : mise en page centrée, titre de l'onglet dans le navigateur
+st.set_page_config(layout="centered", page_title="Météo Drone Delivery")
+
+# Applique l'image d'arrière-plan définie par la fonction set_background_image()
+set_background_image()
+
+# Affiche un titre principal en haut de la page Streamlit
+st.title("🌍 Sélectionnez un point de livraison sur la carte")
+
+# Carte interactive
+
+# Crée une carte Folium centrée sur Paris (coordonnées : 48.85°N, 2.35°E) avec un zoom initial de 4
+m = folium.Map(location=[48.85, 2.35], zoom_start=4)
+
+# Ajoute une fonctionnalité qui affiche les coordonnées latitude/longitude lorsqu'on clique sur la carte
+folium.LatLngPopup().add_to(m)
+
+# Affiche un petit texte informatif en bleu pour guider l'utilisateur
+st.markdown('<p style="color:blue">Cliquez sur la carte pour sélectionner les coordonnées.</p>', unsafe_allow_html=True)
+
+# Intègre la carte Folium dans l'application Streamlit et récupère les données de clic (coordonnées choisies)
+map_data = st_folium(m, width=700, height=500)
