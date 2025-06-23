@@ -84,3 +84,51 @@ st.markdown('<p style="color:blue">Cliquez sur la carte pour sélectionner les c
 
 # Intègre la carte Folium dans l'application Streamlit et récupère les données de clic (coordonnées choisies)
 map_data = st_folium(m, width=700, height=500)
+
+# Si l'utilisateur clique sur la carte et que des coordonnées sont disponibles
+if map_data and map_data["last_clicked"]:
+    # Récupère la latitude et la longitude du point cliqué par l'utilisateur
+    lat = map_data["last_clicked"]["lat"]
+    lon = map_data["last_clicked"]["lng"]
+
+    # Affiche un message de confirmation avec les coordonnées sélectionnées (arrondies à 4 décimales)
+    st.success(f"📍 Coordonnées sélectionnées : {lat:.4f}, {lon:.4f}")
+
+    # 📡 Préparation de l'URL pour appeler l'API météo Open-Meteo
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?"
+        f"latitude={lat}&longitude={lon}"
+        f"&hourly=wind_speed_10m,wind_direction_10m,"
+        f"wind_speed_80m,wind_direction_80m,"
+        f"wind_speed_120m,wind_direction_120m,"
+        f"wind_speed_180m,wind_direction_180m"
+        f"&timezone=auto"
+    )
+
+    try:
+        # Envoie une requête HTTP GET à l'API et transforme la réponse en dictionnaire JSON
+        response = requests.get(url).json()
+
+        # Récupère les heures disponibles dans les données météo
+        heures_disponibles = response["hourly"]["time"]
+
+        # Convertit les heures ISO en objets datetime (plus faciles à manipuler)
+        heures_disponibles_dt = [datetime.fromisoformat(h) for h in heures_disponibles]
+
+        # Interface pour sélectionner une date de livraison avec un calendrier interactif
+        st.subheader("🗓️ Sélection de la date de livraison")
+
+        # Définition des limites de sélection : entre aujourd’hui et dans 7 jours
+        min_date = datetime.now().date()
+        max_date = (datetime.now() + timedelta(days=7)).date()
+
+        # Affiche un calendrier où l'utilisateur choisit la date de livraison
+        date_selectionnee = st.date_input(
+            "Choisissez la date de livraison",
+            min_value=min_date,
+            max_value=max_date,
+            value=min_date
+        )
+
+        # Filtre les heures météo uniquement pour la date sélectionnée
+        heures_du_jour = [h for h in heures_disponibles_dt if h.date() == date_selectionnee]
