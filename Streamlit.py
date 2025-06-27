@@ -27,7 +27,7 @@ import plotly.express as px
 
 from importer_vent import *
 from simultion_final import *
-from simulation_trajectoire_parachute import *
+
 
 
 # Calcule la température standard en fonction de l'altitude (selon l'atmosphère standard de l'ISA)
@@ -284,25 +284,24 @@ if map_data and map_data["last_clicked"] is not None:
 
 # Si un point a bien été sélectionné (stocké en session)
 if st.session_state.clicked_point:
-    # Affiche un bouton pour lancer la simulation
     if st.button("🚀 Lancer la simulation"):
-        # Récupère les coordonnées mémorisées
         lat = st.session_state.clicked_point["lat"]
         lon = st.session_state.clicked_point["lng"]
 
-        # Affiche un spinner pendant que la simulation s'exécute
+        st.write(f" Simulation pour : lat = {lat:.4f}, lon = {lon:.4f}")
+
         with st.spinner("Simulation en cours..."):
-            # Appelle une fonction (personnalisée) pour simuler la trajectoire du drone/parachute
-            x_star, erreur, (xf, yf), z_t, time = simuler_trajectoire(lat=lat, lon=lon)
+            simulateur = SimulerTrajectoire(lat=lat, lon=lon)
+            x_star, erreur, (xf, yf), z_t, time = simulateur.optimiser_trajectoire()
 
-        # Résultats de la simulation
-        st.write(f"📍 Point d'atterrissage : ({xf:.2f}, {yf:.2f})")  # Coordonnées finales
-        st.write(f"🎯 Erreur par rapport à la cible : {erreur:.2f} m")  # Précision de l'atterrissage
+            # Affiche les graphiques propres à ces coordonnées
+            fig2d = simulateur.dessin_trajectoire_2D()
+            fig3d = simulateur.dessin_trajectoire_3D()
+            gif = simulateur.animation_trajectoire()
 
-        # Affiche différentes visualisations de la trajectoire
-        st.image("trajectoire.gif", caption="Animation 3D de la trajectoire")  # Animation GIF
-        st.image("graph2D.png", caption="📉 Trajectoire au sol (2D)")          # Vue 2D
-        st.image("graph3D.png", caption="📊 Trajectoire complète (3D)")       # Vue 3D
+        st.image(gif, caption="🎞️ Animation 3D de la trajectoire")
+        st.image(fig2d, caption="📉 Trajectoire au sol (2D)")
+        st.image(fig3d, caption="📊 Trajectoire complète (3D)")
 
 
 # 🎨 Style CSS personnalisé
@@ -330,6 +329,15 @@ thead tr th, tbody tr td {
 
 
 
+st.markdown("""
+<style>
+.element-container iframe {
+    height: 500px !important;
+    min-height: 500px !important;
+    max-height: 500px !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 
