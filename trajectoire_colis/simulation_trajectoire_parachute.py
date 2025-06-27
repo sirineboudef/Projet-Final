@@ -13,7 +13,7 @@ Ce module permet :
 
 # Importations nécessaires
 import numpy as np
-from importer_vent import import_vent
+from trajectoire_colis.importer_vent import import_vent
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')

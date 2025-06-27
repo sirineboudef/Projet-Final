@@ -17,13 +17,12 @@ Date : 26/06/2026
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
-import requests
 from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import plotly.express as px
-from importer_vent import *
-from simultion_final import *
+from trajectoire_colis.importer_vent import *
+from trajectoire_colis.simultion_final import *
 
 class InterfaceStreamlit:
     """

@@ -15,13 +15,9 @@ Ce module propose une interface interactive qui permet à l'utilisateur de :
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
-import requests
-from datetime import datetime, timedelta
 import pytz
 import pandas as pd
-import plotly.express as px
-from importer_vent import *
-from simultion_final import *
+
 
 def temperature_standard(h):
     """
