@@ -7,12 +7,18 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 import cvxpy as cvx
 
 class SimulerTrajectoire:
-    def __init__(self, lat=47.3388, lon=-81.9141, N=31):
+    def __init__(self, lat=13, lon=50, N=31, random_range=600):
         self.lat = lat
         self.lon = lon
+        print(f"[INIT] Simulation lancée pour : lat = {lat}, lon = {lon}")
+
         self.N = N
         self.z0 = 1200
-        self.x_0 = np.array([[lat+1000], [lon+1000]])
+        # marge random
+        random_lat = np.random.uniform(-random_range, random_range)
+        random_lon = np.random.uniform(-random_range, random_range)
+        self.x_0 = np.array([[lat + random_lat], [lon + random_lon]])
+        #self.x_0 = np.array([[lat+0.01], [lon+0.01]])
         self.cz = 2.256E-5
         self.ce = 4.2559
         self.cf = self.ce / 2 + 1
@@ -115,7 +121,8 @@ class SimulerTrajectoire:
         return np.sqrt((xf - tx) ** 2 + (yf - ty) ** 2)
 
     def dessin_trajectoire_2D(self):
-        fig = plt.figure()
+        filename = f"graph2D_{self.lat:.2f}_{self.lon:.2f}.png"
+        plt.figure()
         plt.plot(self.x_star[0, :], self.x_star[1, :], 'b--', label="Trajectoire optimisée")
         plt.plot(self.x_star[0, 0], self.x_star[1, 0], 'go', label="Départ")
         plt.plot(self.x_star[0, -1], self.x_star[1, -1], 'ro', label="Arrivée")
@@ -124,10 +131,13 @@ class SimulerTrajectoire:
         plt.title("Trajectoire 2D au sol")
         plt.legend()
         plt.grid(True)
-        plt.savefig("graph2D.png")
+        plt.savefig(filename)
         plt.show()
+        plt.close()
+        return filename
 
     def dessin_trajectoire_3D(self):
+        filename = f"graph3D_{self.lat:.2f}_{self.lon:.2f}.png"
         fig = plt.figure()
         ax3d = fig.add_subplot(111, projection='3d')
         ax3d.plot(self.x_star[0, :], self.x_star[1, :], self.z_t, 'b--', label="Trajectoire optimisée")
@@ -138,10 +148,14 @@ class SimulerTrajectoire:
         ax3d.set_zlabel("z (m)")
         ax3d.set_title("Trajectoire 3D")
         ax3d.legend()
-        plt.savefig("graph3D.png")
+        plt.savefig(filename)
         plt.show()
+        plt.close()
+        return filename
 
     def animation_trajectoire(self):
+        filename = f"trajectoire_{self.lat:.2f}_{self.lon:.2f}.gif"
+
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         line, = ax.plot([], [], [], lw=2, label="Trajectoire", linestyle=':')
@@ -168,12 +182,15 @@ class SimulerTrajectoire:
 
         ani = FuncAnimation(fig, update, frames=len(self.time), interval=170, blit=False)
         plt.legend()
-        plt.show()
-        ani.save("trajectoire.gif", writer=PillowWriter(fps=5))
+        plt.close()  # Pour ne pas afficher dans Streamlit
+        ani.save(filename, writer=PillowWriter(fps=5))
+        return filename
+
 
 # Appel de la fonction:
-simulateur = SimulerTrajectoire()
-X, erreur, (xf, yf), z_t, time = simulateur.optimiser_trajectoire()
-simulateur.dessin_trajectoire_2D()
-simulateur.dessin_trajectoire_3D()
-simulateur.animation_trajectoire()
+if __name__ == "__main__":
+ simulateur = SimulerTrajectoire()
+ X, erreur, (xf, yf), z_t, time = simulateur.optimiser_trajectoire()
+ simulateur.dessin_trajectoire_2D()
+ simulateur.dessin_trajectoire_3D()
+ simulateur.animation_trajectoire()
