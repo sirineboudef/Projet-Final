@@ -1,5 +1,5 @@
 """
-main.py - Point d'entrée du simulateur de parachute guidé
+main.py - Point d'entrée principal du simulateur de parachute guidé
 
 Ce fichier exécute l'interface principale basée sur Streamlit.
 L'utilisateur peut sélectionner une position, visualiser les vents et lancer une simulation.
