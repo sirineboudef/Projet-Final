@@ -1,3 +1,20 @@
+"""
+Ce module contient la classe `InterfaceStreamlit`, responsable de l'affichage
+de l'interface interactive avec l'utilisateur via Streamlit.
+
+  Elle permet de :
+     - Sélectionner une position cible sur une carte (via folium),
+     - Récupérer les données météo correspondantes via l'API Open-Meteo,
+     - Afficher les profils de vent, température et pression par altitude,
+     - Lancer la simulation de trajectoire (optimisation convexe),
+     - Visualiser les résultats (graphes 2D, 3D et animation GIF).
+
+Auteurs : Wilson David Parra Oliveros - Syrine Boudef - Linda Ghazouani
+
+Date : 26/06/2026
+"""
+
+# Importations des bibliotheques necessaires
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
@@ -10,7 +27,21 @@ from importer_vent import *
 from simultion_final import *
 
 class InterfaceStreamlit:
+    """
+    Classe principale pour gérer l'interface graphique avec Streamlit.
+
+        Attributs :
+            lat (float) : Latitude du point sélectionné par l'utilisateur.
+            lon (float) : Longitude du point sélectionné.
+            date_selectionnee (datetime.date) : Date de livraison choisie.
+            heure_selectionnee (datetime.datetime) : Heure exacte sélectionnée.
+            index_horaire (int) : Index de l'heure dans les données météo.
+            response (dict) : Données météo brutes reçues depuis Open-Meteo.
+    """
     def __init__(self):
+        """
+        Initialise les variables de l'interface : position, date, heure, données météo, etc.
+        """
         self.lat = None
         self.lon = None
         self.date_selectionnee = None
@@ -19,11 +50,29 @@ class InterfaceStreamlit:
         self.response = None
 
     def temperature_standard(self, h):
+        """
+        Calcule la température standard (modèle ISA) à une altitude donnée.
+
+          Paramètre :
+            h (float) : Altitude en mètres.
+
+          Retour :
+            float : Température en Kelvin à l'altitude h.
+        """
         T0 = 288.15
         lapse_rate = 0.0065
         return T0 - lapse_rate * h
 
     def pression_standard(self, h):
+        """
+        Calcule la pression atmosphérique standard ISA pour une altitude donnée.
+
+        Paramètres :
+        - h : altitude en mètres.
+
+        Retour :
+        - Pression en hPa.
+        """
         T0 = 288.15
         P0 = 1013.25
         lapse_rate = 0.0065
@@ -32,12 +81,24 @@ class InterfaceStreamlit:
         R = 8.31447
         return P0 * (1 - (lapse_rate * h) / T0) ** ((g * M) / (R * lapse_rate))
 
-    def angle_to_direction(self, angle):
+    def angle_de_direction(self, angle):
+        """
+        Convertit un angle en degrés en une direction cardinale (ex: Nord, Sud-Ouest...).
+
+        Paramètres :
+        - angle : angle en degrés.
+
+        Retour :
+        - Nom de la direction (str).
+        """
         directions = ['Nord', 'Nord-Est', 'Est', 'Sud-Est', 'Sud', 'Sud-Ouest', 'Ouest', 'Nord-Ouest']
         idx = int((angle + 22.5) % 360 / 45)
         return directions[idx]
 
     def set_background_image(self):
+        """
+        Applique un fond d’écran animé à l’application Streamlit à l’aide de CSS personnalisé.
+        """
         page_bg_img = '''
         <style>
         .stApp {
@@ -51,6 +112,10 @@ class InterfaceStreamlit:
         st.markdown(page_bg_img, unsafe_allow_html=True)
 
     def afficher_interface(self):
+        """
+        Affiche l’interface utilisateur principale : carte de sélection, récupération météo,
+        et bouton de lancement de simulation.
+        """
         st.set_page_config(layout="centered", page_title="Météo Drone Delivery")
         # mettre la couleur d'ecriture en rouge
         st.markdown("""
@@ -121,6 +186,10 @@ class InterfaceStreamlit:
                 st.image(fig3d, caption="📊 Trajectoire complète (3D)")
 
     def recuperer_donnees(self):
+        """
+        Fait une requête HTTP vers l’API Open-Meteo pour récupérer les données de vent
+        à différentes altitudes, pour la position et la date sélectionnées.
+        """
         try:
             url = (
                 f"https://api.open-meteo.com/v1/forecast?"
@@ -154,6 +223,10 @@ class InterfaceStreamlit:
             st.exception(e)
 
     def afficher_meteo(self):
+        """
+        Affiche les données météo récupérées sous forme de tableau interactif et
+        de visualisations (courbes et graphique polaire).
+        """
         altitudes = [10, 80, 120, 180]
         meteo_multi_alt = []
 
@@ -165,7 +238,7 @@ class InterfaceStreamlit:
                 "Altitude (m)": alt,
                 "Vitesse (m/s)": round(vitesse, 2) if vitesse else None,
                 "Direction (°)": round(direction) if direction else None,
-                "Direction": self.angle_to_direction(direction) if direction else None,
+                "Direction": self.angle_de_direction(direction) if direction else None,
                 "Température (°C)": round(self.temperature_standard(alt) - 273.15, 2),
                 "Pression (kPa)": round(self.pression_standard(alt) / 10, 2)
             })

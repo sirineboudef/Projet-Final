@@ -1,3 +1,17 @@
+"""
+Ce module définit la classe 'SimulerTrajectoire' pour simuler la trajectoire optimisée d'un parachute guidé (Activement)
+à partir d'une position initiale de largage vers une cible GPS precise, en tenant compte de
+l'altitude, de la densité de l'air, et du vent réel importé via API.
+
+ Contient :
+   - Le calcul de la densité, altitude et vitesse selon des modèles empiriques.
+   - L'optimisation convexe de la trajectoire avec (cvxpy).
+   - Le dessin 2D, 3D et une animation 3D de la trajectoire.
+
+Auteurs : Syrine Boudef - Wilson David Parra Oliveros - Linda Ghazouani
+Date : 26/06/2026
+"""
+
 import numpy as np
 from importer_vent import import_vent
 import matplotlib.pyplot as plt
@@ -7,11 +21,20 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 import cvxpy as cvx
 
 class SimulerTrajectoire:
+    """
+        Classe qui encapsule la simulation de la trajectoire optimisée du parachute
+        avec guidage horizontal sous l'effet du vent, vers une cible GPS precise.
+        """
     def __init__(self, lat=13, lon=50, N=31, random_range=600):
+        """
+        Initialise les paramètres physiques et environnementaux du modèle.
+        lat, lon : positions de la cible (latitude et longitude)
+        N : nombre d'étapes temporelles
+        random_range : écart aléatoire autour de la cible pour la position initiale
+        """
         self.lat = lat
         self.lon = lon
         print(f"[INIT] Simulation lancée pour : lat = {lat}, lon = {lon}")
-
         self.N = N
         self.z0 = 1200
         # marge random
@@ -30,17 +53,24 @@ class SimulerTrajectoire:
         self.psi_0 = 0.
 
     def calcul_altitude(self, t):
+        """ Fonction pour le calcule de l'altitude en fonction du temps t (m)"""
         return 1 / self.cz * (1 - ((((1 - self.z0 * self.cz) ** self.cf) / self.cf / self.cz -
                                     (t - self.t0) * self.rz0 * np.sqrt(self.rho0) / np.sqrt(self.ch)) *
                                    self.cf * self.cz) ** (1 / self.cf))
 
     def calcul_densite(self, z):
+        """ Fonction qui renvoie la densité de l'air en fonction de l'altitude z """
         return self.ch * (1 - z * self.cz) ** self.ce
 
     def calcul_profil_vitesse(self, z):
+        """ Fonction pour le calcul de la vitesse verticale en fonction de la densité d'air à z """
         return self.vz0 * np.sqrt(self.rho0 / self.calcul_densite(z))
 
     def optimiser_trajectoire(self):
+        """
+        Fonction principale pour la résolution du problème d'optimisation convexe avec contraintes physiques,
+        pour minimiser la distance à la cible.
+        """
         W, z_t, time, _ = import_vent(self.lat, self.lon, self.N)
         self.time = time
         self.z_t = z_t
@@ -115,12 +145,14 @@ class SimulerTrajectoire:
         return self.x_star, self.calcul_erreur(), (self.x_star[0, -1], self.x_star[1, -1]), self.z_t, self.time
 
     def calcul_erreur(self):
+        """Calcule l'erreur à la cible finale"""
         xf = self.x_star[0, -1]
         yf = self.x_star[1, -1]
         tx, ty = self.target[0], self.target[1]
         return np.sqrt((xf - tx) ** 2 + (yf - ty) ** 2)
 
     def dessin_trajectoire_2D(self):
+        """Affiche et sauvegarde la trajectoire au sol en 2D"""
         filename = f"graph2D_{self.lat:.2f}_{self.lon:.2f}.png"
         plt.figure()
         plt.plot(self.x_star[0, :], self.x_star[1, :], 'b--', label="Trajectoire optimisée")
@@ -137,6 +169,7 @@ class SimulerTrajectoire:
         return filename
 
     def dessin_trajectoire_3D(self):
+        """Affiche et sauvegarde la trajectoire 3D (avec altitude)"""
         filename = f"graph3D_{self.lat:.2f}_{self.lon:.2f}.png"
         fig = plt.figure()
         ax3d = fig.add_subplot(111, projection='3d')
@@ -154,8 +187,8 @@ class SimulerTrajectoire:
         return filename
 
     def animation_trajectoire(self):
+        """Crée une animation 3D de la descente et la sauvegarde en .gif"""
         filename = f"trajectoire_{self.lat:.2f}_{self.lon:.2f}.gif"
-
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         line, = ax.plot([], [], [], lw=2, label="Trajectoire", linestyle=':')
