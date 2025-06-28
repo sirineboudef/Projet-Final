@@ -11,7 +11,7 @@ L'utilisateur peut :
 :date: 26/06/2026
 """
 
-from trajectoire_colis.streamlit_en_POO import InterfaceStreamlit
+from trajectoire_colis.interface_graphique import InterfaceStreamlit
 
 def main():
     """

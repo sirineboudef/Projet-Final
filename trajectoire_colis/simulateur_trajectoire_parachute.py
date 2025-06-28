@@ -12,7 +12,7 @@ Contient :
 """
 
 import numpy as np
-from trajectoire_colis.importer_vent import import_vent
+from trajectoire_colis.recuperateur_meteo import import_vent
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')
