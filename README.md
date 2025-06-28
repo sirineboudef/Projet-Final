@@ -40,7 +40,7 @@ Le projet est organisé en trois classes principales :
 
 ```bash
 # Cloner le répertoire
-git clone https://github.com/votre_utilisateur/simulateur-parachute.git
+git clone https://github.com/utilisateur/simulateur-parachute.git
 cd simulateur-parachute
 
 # Créer un environnement virtuel (optionnel mais recommandé)
