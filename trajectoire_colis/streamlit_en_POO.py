@@ -80,7 +80,7 @@ class InterfaceStreamlit:
     def set_background_image(self):
         """Applique un fond d'écran animé avec CSS dans Streamlit."""
         page_bg_img = '''<style>.stApp {
-        background-image: url("https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjEx.../giphy.gif");
+        background-image: url("https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG56OTl6bmR1ZjdiY3FxcnhqOHJseDBtc2F3ZGkwcTFuODVlaXJxMyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/j3c5m7TC8BkQyRc7RX/giphy.gif");
         background-size: cover; background-position: center; background-repeat: no-repeat;}</style>'''
         st.markdown(page_bg_img, unsafe_allow_html=True)
 
