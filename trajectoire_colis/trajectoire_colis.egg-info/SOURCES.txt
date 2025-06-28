@@ -1,0 +1,8 @@
+MANIFEST.in
+README.md
+setup.py
+trajectoire_colis.egg-info/PKG-INFO
+trajectoire_colis.egg-info/SOURCES.txt
+trajectoire_colis.egg-info/dependency_links.txt
+trajectoire_colis.egg-info/requires.txt
+trajectoire_colis.egg-info/top_level.txt

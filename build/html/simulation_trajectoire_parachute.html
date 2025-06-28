@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>simulation_trajectoire_parachute module &#8212; Simulateur de Trajectoire de Parachute Guidé 27-06-2025 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=b7065a90"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-simulation_trajectoire_parachute">
+<span id="simulation-trajectoire-parachute-module"></span><h1>simulation_trajectoire_parachute module<a class="headerlink" href="#module-simulation_trajectoire_parachute" title="Link to this heading">¶</a></h1>
+<p>simulation_final.py - Simulation de la trajectoire d’un parachute guidé.</p>
+<dl class="simple">
+<dt>Ce module permet :</dt><dd><ul class="simple">
+<li><p>de récupérer les données de vent via l’API Open-Meteo,</p></li>
+<li><p>de modéliser la chute du parachute avec prise en compte de la densité de l’air,</p></li>
+<li><p>d’optimiser la trajectoire via CVXPY,</p></li>
+<li><p>de visualiser les résultats sous forme de graphiques 2D, 3D et animations.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">author<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Linda Ghazouani, Syrine Boudef, Wilson David Parra Oliveros</p>
+</dd>
+<dt class="field-even">date<span class="colon">:</span></dt>
+<dd class="field-even"><p>26/06/2026</p>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="simulation_trajectoire_parachute.simuler_trajectoire">
+<span class="sig-prename descclassname"><span class="pre">simulation_trajectoire_parachute.</span></span><span class="sig-name descname"><span class="pre">simuler_trajectoire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">47.3388</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-81.9141</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">31</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#simulation_trajectoire_parachute.simuler_trajectoire" title="Link to this definition">¶</a></dt>
+<dd><p>Simule la trajectoire d’un parachute guidé à partir d’un point de largage donné
+en optimisant le contrôle de la direction sous contraintes aérodynamiques et météorologiques.</p>
+<dl class="simple">
+<dt>Cette fonction :</dt><dd><ul class="simple">
+<li><p>récupère les données de vent via l’API Open-Meteo,</p></li>
+<li><p>construit le modèle de chute verticale avec variation de densité de l’air,</p></li>
+<li><p>optimise la trajectoire en fonction d’un coût combinant distance à la cible,
+effort de contrôle et orientation finale,</p></li>
+<li><p>génère des graphes 2D et 3D,</p></li>
+<li><p>exporte une animation GIF de la trajectoire optimisée.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) – Latitude de la cible.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Longitude de la cible.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – Nombre d’étapes temporelles pour la discrétisation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>x_star: Position optimisée du parachute à chaque étape.</p></li>
+<li><p>erreur: Distance finale entre la position d’atterrissage et la cible.</p></li>
+<li><p>(xf, yf): Coordonnées d’atterrissage finales.</p></li>
+<li><p>z_t: Profil d’altitude z(t).</p></li>
+<li><p>time: Vecteur temporel utilisé dans la simulation.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Simulateur de Trajectoire de Parachute Guidé</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Linda Ghazouani, Syrine Boudef, Wilson David Parra Oliveros.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/simulation_trajectoire_parachute.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
